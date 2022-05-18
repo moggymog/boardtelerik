@@ -1,11 +1,18 @@
 /* This example requires Tailwind CSS v2.0+ */
-import { Fragment, useState } from 'react';
+import { Fragment, useState, state } from 'react';
+import React, { Component } from 'react';
+
 import { Dialog, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
 import '@progress/kendo-theme-default/dist/all.css';
 import { process } from '@progress/kendo-data-query';
 import { Grid, GridColumn } from '@progress/kendo-react-grid';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
+import { Window } from '@progress/kendo-react-dialogs';
+
+import categories from './categories.json';
 import products from './products.json';
+
 import {
   CalendarIcon,
   ChartBarIcon,
@@ -51,6 +58,20 @@ const navigation = [
   { name: 'Reports', href: '#', icon: ChartBarIcon, current: false },
 ];
 
+const scrollHandler = (event) => {
+  const e = event.nativeEvent;
+
+  if (
+    e.target.scrollTop + 10 >=
+    e.target.scrollHeight - e.target.clientHeight
+  ) {
+    const moreData = availableProducts.splice(0, 10);
+
+    if (moreData.length > 0) {
+      setGridData((oldData) => oldData.concat(moreData));
+    }
+  }
+};
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
@@ -280,131 +301,12 @@ export default function Main(props) {
                     <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
                       <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                         <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                          <table className="min-w-full divide-y divide-gray-300">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th
-                                  scope="col"
-                                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                                >
-                                  <a href="#" className="group inline-flex">
-                                    Date
-                                    <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
-                                      <ChevronDownIcon
-                                        className="h-5 w-5"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  </a>
-                                </th>
-                                <th
-                                  scope="col"
-                                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                                >
-                                  <a href="#" className="group inline-flex">
-                                    Origin City
-                                    <span className="ml-2 flex-none rounded bg-gray-200 text-gray-900 group-hover:bg-gray-300">
-                                      <ChevronDownIcon
-                                        className="h-5 w-5"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  </a>
-                                </th>
-                                <th
-                                  scope="col"
-                                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                                >
-                                  <a href="#" className="group inline-flex">
-                                    Dest City
-                                    <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
-                                      <ChevronDownIcon
-                                        className="invisible ml-2 h-5 w-5 flex-none rounded text-gray-400 group-hover:visible group-focus:visible"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  </a>
-                                </th>
-                                <th
-                                  scope="col"
-                                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                                >
-                                  <a href="#" className="group inline-flex">
-                                    Offered Rate
-                                    <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
-                                      <ChevronDownIcon
-                                        className="invisible ml-2 h-5 w-5 flex-none rounded text-gray-400 group-hover:visible group-focus:visible"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  </a>
-                                </th>
-                                <th
-                                  scope="col"
-                                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                                >
-                                  <a href="#" className="group inline-flex">
-                                    Company
-                                    <span className="ml-2 flex-none rounded bg-gray-200 text-gray-900 group-hover:bg-gray-300">
-                                      <ChevronDownIcon
-                                        className="h-5 w-5"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  </a>
-                                </th>
-                                <th
-                                  scope="col"
-                                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                                >
-                                  <a href="#" className="group inline-flex">
-                                    Contact
-                                    <span className="ml-2 flex-none rounded bg-gray-200 text-gray-900 group-hover:bg-gray-300">
-                                      <ChevronDownIcon
-                                        className="h-5 w-5"
-                                        aria-hidden="true"
-                                      />
-                                    </span>
-                                  </a>
-                                </th>
-                                <th
-                                  scope="col"
-                                  className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                                >
-                                  <a href="#" className="group inline-flex">
-                                    Comments
-                                  </a>
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 bg-white">
-                              {props.loads.map((loads) => (
-                                <tr key={loads.Rate}>
-                                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                    {loads.Date}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {loads.Origin}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {loads.Dest}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {loads.Rate}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {loads.Company}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {loads.Contact}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {loads.Comments}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                          <Grid data={products}>
+                            <GridColumn field="ProductName" />
+                            <GridColumn field="UnitPrice" />
+                            <GridColumn field="UnitsInStock" />
+                            <GridColumn field="Discontinued" />
+                          </Grid>
                         </div>
                       </div>
                     </div>
