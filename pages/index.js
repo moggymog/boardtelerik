@@ -1,18 +1,21 @@
 /* This example requires Tailwind CSS v2.0+ */
 import { Fragment, useState, state } from 'react';
-import React, { Component } from 'react';
+import * as ReactDOM from 'react-dom';
 
 import { Dialog, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import '@progress/kendo-theme-default/dist/all.css';
-import { process } from '@progress/kendo-data-query';
-import { Grid, GridColumn } from '@progress/kendo-react-grid';
-import { DropDownList } from '@progress/kendo-react-dropdowns';
-import { Window } from '@progress/kendo-react-dialogs';
 
+import React, { Component } from 'react';
+import '@progress/kendo-theme-default/dist/all.css';
 import categories from './categories.json';
 import products from './products.json';
+import { process } from '@progress/kendo-data-query';
+import { Grid, GridColumn } from '@progress/kendo-react-grid';
+import { GridColumn as Column } from '@progress/kendo-react-grid';
 
+import { DropDownList } from '@progress/kendo-react-dropdowns';
+import { Window } from '@progress/kendo-react-dialogs';
+import { ColumnMenu, ColumnMenuCheckboxFilter } from './columnMenu';
 import {
   CalendarIcon,
   ChartBarIcon,
@@ -75,9 +78,27 @@ const scrollHandler = (event) => {
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
+const createDataState = (dataState, props) => {
+  return {
+    result: process(products.slice(0), dataState),
+    dataState: dataState,
+  };
+};
 
 export default function Main(props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  let initialState = createDataState({
+    take: 8,
+    skip: 0,
+  });
+  const [result, setResult] = React.useState(initialState.result);
+  const [dataState, setDataState] = React.useState(initialState.dataState);
+
+  const dataStateChange = (event) => {
+    let updatedState = createDataState(event.dataState);
+    setResult(updatedState.result);
+    setDataState(updatedState.dataState);
+  };
 
   return (
     <>
@@ -301,11 +322,26 @@ export default function Main(props) {
                     <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
                       <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                         <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                          <Grid data={products}>
-                            <GridColumn field="ProductName" />
-                            <GridColumn field="UnitPrice" />
-                            <GridColumn field="UnitsInStock" />
-                            <GridColumn field="Discontinued" />
+                          <Grid
+                            data={props.loads}
+                            {...dataState}
+                            onDataStateChange={dataStateChange}
+                            sortable={true}
+                            pageable={true}
+                            pageSize={8}
+                            style={{ height: '1000px' }}
+                          >
+                            <GridColumn field="Date" />
+                            <GridColumn
+                              field="Origin"
+                              columnMenu={ColumnMenuCheckboxFilter}
+                            />
+                            <GridColumn field="Dest" />
+                            <GridColumn field="Rate" />
+                            <GridColumn field="Company" />
+                            <GridColumn field="Contact" />
+                            <GridColumn field="Comments" />
+                            <GridColumn field="Rate" />
                           </Grid>
                         </div>
                       </div>
